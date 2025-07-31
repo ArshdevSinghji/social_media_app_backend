@@ -1,34 +1,59 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Param,
+  Delete,
+  UseGuards,
+  Req,
+  Get,
+  Query,
+} from '@nestjs/common';
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
-import { UpdatePostDto } from './dto/update-post.dto';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { LikeService } from 'src/like/like.service';
 
 @Controller('post')
 export class PostController {
-  constructor(private readonly postService: PostService) {}
-
-  @Post()
-  create(@Body() createPostDto: CreatePostDto) {
-    return this.postService.create(createPostDto);
-  }
+  constructor(
+    private readonly postService: PostService,
+    private readonly likeService: LikeService,
+  ) {}
 
   @Get()
-  findAll() {
-    return this.postService.findAll();
+  async findPosts(
+    @Query('orderBy') orderBy?: string,
+    @Query('limit') limit?: number,
+    @Query('page') page?: number,
+  ) {
+    return await this.postService.findPosts(orderBy, limit, page);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.postService.findOne(+id);
+  @UseGuards(AuthGuard)
+  @Post()
+  async createPost(@Body() createPostDto: CreatePostDto, @Req() req: any) {
+    const email = req.user.email;
+    return this.postService.createPost(createPostDto, email);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
-    return this.postService.update(+id, updatePostDto);
+  @UseGuards(AuthGuard)
+  @Post('/:postId/like')
+  async likePost(@Param('postId') postId: string, @Req() req: any) {
+    const userId = req.user.userId;
+    return this.likeService.createLike(+userId, +postId);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.postService.remove(+id);
+  @UseGuards(AuthGuard)
+  @Delete('/:postId/like')
+  async unlikePost(@Param('postId') postId: string, @Req() req: any) {
+    const userId = req.user.userId;
+    return this.likeService.removeLike(+userId, +postId);
+  }
+
+  @UseGuards(AuthGuard)
+  @Delete('/:postId')
+  async deletePost(@Param('postId') postId: string, @Req() req: any) {
+    return this.postService.deletePost(+postId);
   }
 }
