@@ -5,16 +5,16 @@ export class PostDto {
   @IsEnum(PostType)
   type: PostType;
 
-  @IsString()
   @IsOptional()
+  @IsString()
   content?: string;
 
-  @IsString()
   @IsOptional()
+  @IsString()
   quote?: string;
 
-  @IsString()
   @IsOptional()
+  @IsString()
   author?: string;
 
   @IsInt()

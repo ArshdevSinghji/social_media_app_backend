@@ -68,10 +68,12 @@ export class PostService {
       user,
     });
 
+    const savedPost = await this.postRepository.save(post);
+
     if (post.type === PostType.TEXT && postData.content) {
       await this.textPostService.createTextPost({
         content: postData.content,
-        postId: post.postId,
+        postId: savedPost.postId,
       });
     }
 
@@ -79,11 +81,11 @@ export class PostService {
       await this.quotePostService.createQuotePost({
         quote: postData.quote,
         author: postData.author,
-        postId: post.postId,
+        postId: savedPost.postId,
       });
     }
 
-    return await this.postRepository.save(post);
+    return savedPost;
   }
 
   async deletePost(postId: number) {
