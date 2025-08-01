@@ -2,36 +2,37 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Like } from './entities/like.entity';
-import { CreateLikeDto } from './dto/create-like.dto';
-import { UserService } from 'src/user/user.service';
-import { PostService } from 'src/post/post.service';
+import { Post } from 'src/post/entities/post.entity';
+import { User } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class LikeService {
   constructor(
     @InjectRepository(Like)
     private likeRepository: Repository<Like>,
-    private readonly userService: UserService,
-    private readonly postService: PostService,
   ) {}
 
-  async createLike(createLikeDto: CreateLikeDto) {
-    const user = await this.userService.findUserById(createLikeDto.userId);
-    if (!user) {
-      throw new NotFoundException('User not found');
+  async likeUnLikePost(post: Post, user: User) {
+    const likePost = this.likeRepository.create({ post, user });
+
+    const existingLike = await this.existingLike(post, user);
+    if (existingLike) {
+      return this.unLike(existingLike.likedId);
     }
 
-    const post = await this.postService.findPostById(createLikeDto.postId);
-    if (!post) {
-      throw new NotFoundException('Post not found');
-    }
-
-    const like = this.likeRepository.create({
-      user,
-      post,
-    });
-    return await this.likeRepository.save(like);
+    return this.likeRepository.save(likePost);
   }
 
-  async removeLike(createLikeDto: CreateLikeDto) {}
+  async existingLike(post: Post, user: User) {
+    const query = this.likeRepository
+      .createQueryBuilder('like')
+      .where('like.postId = :postId', { postId: post.postId })
+      .andWhere('like.userId = :userId', { userId: user.userId });
+
+    return await query.getOne();
+  }
+
+  async unLike(likedId: number) {
+    return await this.likeRepository.softDelete(likedId);
+  }
 }

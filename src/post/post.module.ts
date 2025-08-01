@@ -6,6 +6,7 @@ import { UserModule } from 'src/user/user.module';
 import { TextPostModule } from 'src/text-post/text-post.module';
 import { QuotePostModule } from 'src/quote-post/quote-post.module';
 import { Post } from './entities/post.entity';
+import { LikeModule } from 'src/like/like.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { Post } from './entities/post.entity';
     UserModule,
     TextPostModule,
     QuotePostModule,
+    LikeModule,
   ],
   controllers: [PostController],
   providers: [PostService],

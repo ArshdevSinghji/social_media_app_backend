@@ -11,6 +11,7 @@ import { PostType } from 'src/enum';
 import { PostDto } from './dto/create-post.dto';
 import { TextPostService } from 'src/text-post/text-post.service';
 import { QuotePostService } from 'src/quote-post/quote-post.service';
+import { LikeService } from 'src/like/like.service';
 
 @Injectable()
 export class PostService {
@@ -20,6 +21,7 @@ export class PostService {
     private userService: UserService,
     private textPostService: TextPostService,
     private quotePostService: QuotePostService,
+    private readonly likeService: LikeService,
   ) {}
 
   async findPosts(
@@ -52,6 +54,20 @@ export class PostService {
     }
 
     return await query.getMany();
+  }
+
+  async likeUnLikePost(postId: number, userId: number) {
+    const post = await this.findPostById(postId);
+    if (!post) {
+      throw new NotFoundException('Post not found');
+    }
+
+    const user = await this.userService.findUserById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return this.likeService.likeUnLikePost(post, user);
   }
 
   async createPost(postDto: PostDto) {
