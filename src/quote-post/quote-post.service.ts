@@ -1,26 +1,18 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { QuotePost } from './entities/quote-post.entity';
+import { Repository } from 'typeorm';
 import { CreateQuotePostDto } from './dto/create-quote-post.dto';
-import { UpdateQuotePostDto } from './dto/update-quote-post.dto';
 
 @Injectable()
 export class QuotePostService {
-  create(createQuotePostDto: CreateQuotePostDto) {
-    return 'This action adds a new quotePost';
-  }
+  constructor(
+    @InjectRepository(QuotePost)
+    private quotePostRepository: Repository<QuotePost>,
+  ) {}
 
-  findAll() {
-    return `This action returns all quotePost`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} quotePost`;
-  }
-
-  update(id: number, updateQuotePostDto: UpdateQuotePostDto) {
-    return `This action updates a #${id} quotePost`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} quotePost`;
+  async createQuotePost(createQuotePost: CreateQuotePostDto) {
+    const quotePost = this.quotePostRepository.create({ ...createQuotePost });
+    return await this.quotePostRepository.save(quotePost);
   }
 }

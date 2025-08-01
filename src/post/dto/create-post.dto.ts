@@ -1,16 +1,22 @@
+import { IsEnum, IsInt, IsOptional, IsString } from 'class-validator';
 import { PostType } from 'src/enum';
-import { Column } from 'typeorm';
 
-export class CreatePostDto {
-  @Column({ type: 'enum', enum: PostType })
+export class PostDto {
+  @IsEnum(PostType)
   type: PostType;
 
-  @Column()
-  content: string;
+  @IsString()
+  @IsOptional()
+  content?: string;
 
-  @Column()
-  quote: string;
+  @IsString()
+  @IsOptional()
+  quote?: string;
 
-  @Column()
-  author: string;
+  @IsString()
+  @IsOptional()
+  author?: string;
+
+  @IsInt()
+  userId: number;
 }

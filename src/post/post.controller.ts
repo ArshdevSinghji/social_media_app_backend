@@ -4,56 +4,33 @@ import {
   Body,
   Param,
   Delete,
-  UseGuards,
-  Req,
   Get,
   Query,
 } from '@nestjs/common';
 import { PostService } from './post.service';
-import { CreatePostDto } from './dto/create-post.dto';
-import { AuthGuard } from 'src/auth/auth.guard';
-import { LikeService } from 'src/like/like.service';
+import { PostDto } from './dto/create-post.dto';
 
 @Controller('post')
 export class PostController {
-  constructor(
-    private readonly postService: PostService,
-    private readonly likeService: LikeService,
-  ) {}
+  constructor(private readonly postService: PostService) {}
 
   @Get()
   async findPosts(
     @Query('orderBy') orderBy?: string,
     @Query('limit') limit?: number,
     @Query('page') page?: number,
+    @Query('userId') userId?: number,
   ) {
-    return await this.postService.findPosts(orderBy, limit, page);
+    return await this.postService.findPosts(orderBy, limit, page, userId);
   }
 
-  @UseGuards(AuthGuard)
   @Post()
-  async createPost(@Body() createPostDto: CreatePostDto, @Req() req: any) {
-    const email = req.user.email;
-    return this.postService.createPost(createPostDto, email);
+  async createPost(@Body() postDto: PostDto) {
+    return this.postService.createPost(postDto);
   }
 
-  @UseGuards(AuthGuard)
-  @Post('/:postId/like')
-  async likePost(@Param('postId') postId: string, @Req() req: any) {
-    const userId = req.user.userId;
-    return this.likeService.createLike(+userId, +postId);
-  }
-
-  @UseGuards(AuthGuard)
-  @Delete('/:postId/like')
-  async unlikePost(@Param('postId') postId: string, @Req() req: any) {
-    const userId = req.user.userId;
-    return this.likeService.removeLike(+userId, +postId);
-  }
-
-  @UseGuards(AuthGuard)
   @Delete('/:postId')
-  async deletePost(@Param('postId') postId: string, @Req() req: any) {
+  async deletePost(@Param('postId') postId: string) {
     return this.postService.deletePost(+postId);
   }
 }
