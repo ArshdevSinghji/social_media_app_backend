@@ -6,6 +6,7 @@ import {
   Delete,
   Get,
   Query,
+  Patch,
 } from '@nestjs/common';
 import { PostService } from './post.service';
 import { PostDto } from './dto/create-post.dto';
@@ -29,7 +30,7 @@ export class PostController {
     return this.postService.createPost(postDto);
   }
 
-  @Post(':postId/like')
+  @Patch(':postId/like')
   async likePost(
     @Param('postId') postId: string,
     @Body('userId') userId: number,
